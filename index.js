@@ -1,10 +1,21 @@
 require('dotenv').config()
-const https = require('https')
-
-//main dep
+const commandHandler = require('./src/rwlbox_bot_core/commandHandler/index')
+// main dep
 const TelegramBot = require('node-telegram-bot-api')
 
 // bot instance object
-const botInstance = new TelegramBot(process.env.BOT_TOKEN, { polling: true })
+const botInstance = new TelegramBot(process.env.BOT_TOKEN, {
+  polling: {
+    interval: 300,
+    autoStart: true,
+    params: {
+      timeout: 10,
+    },
+  },
+})
 
-botInstance.on('message', msg => console.log(msg))
+// local helpers
+const instanceCommandHandler = commandHandler(botInstance)
+
+// sends default message in case of not handled user inputs
+botInstance.on('message', msg => instanceCommandHandler(msg))
