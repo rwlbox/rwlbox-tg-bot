@@ -30,13 +30,16 @@ const tipBoxData = [
   'Yes. Really. No jokes.',
 ]
 
+const addTag = tag => str => `[${tag}] ${str}`
+
 // generates lootbox from passed data
 // generateLootbox(data: [Any]) -> Any
-const generateLootbox = data => data[random(0, data.length)]
+const generateLootbox = data => addTag('RED', data[random(0, data.length)])
 
 // generates special lootbox from passed data
 // generateLootbox(data: [Any]) -> Any
-const generateSpecialLootbox = data => data[random(0, data.length)]
+const generateSpecialLootbox = data =>
+  addTag('BLUE', data[random(0, data.length)])
 
 const getLootbox = () =>
   isSpecial(process.env.CHANCE)
