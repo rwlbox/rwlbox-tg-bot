@@ -1,8 +1,5 @@
 const { sendDefaultReply } = require('../../utils')
-const {
-  processGetLootboxCommand,
-  processGetTipboxCommand,
-} = require('./commands')
+const { processGetLootboxCommand } = require('./commands')
 
 const commandHandler = bot => msg => {
   const {
@@ -15,8 +12,6 @@ const commandHandler = bot => msg => {
   switch (text) {
     case '/get_lootbox':
       return processGetLootboxCommand(bot, msg)
-    case '/get_tipbox':
-      return processGetTipboxCommand(bot, msg)
     default:
       return defaultReply(id)
   }

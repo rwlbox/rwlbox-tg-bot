@@ -1,55 +1,96 @@
-const { random, isSpecial } = require('../utils')
+const { rewardBoxes, rewardChances } = require('./lootbox.data')
+const { randomInRange } = require('../utils')
+const { map, range, compose, prop, curry } = require('ramda')
+const { trace } = require('../../../utils')
 
-// temp data
-const commonLootboxData = [
-  'Sorry, I have nothing for you but my salty dick. Try next time.',
-  'Hey, mate, here is your prize: fuck off',
-  'Great job this time! Your reward will be your own mom.',
-  'Yes you did something useful for yourself, now what? Shoot some flying colors for ya? Go hard, you bitch.',
-]
+const getUserChances = () => rewardChances
 
-const specialLootboxData = [
-  "Congratulations! You've won a special prize: suck my dick",
-  'Amazing opportunity for your hard work: go drink tap water',
-  'Hell yeah! You got a nice buff for the whole week: you can jerk off x2 times!',
-]
+const getUserRewards = () => rewardBoxes
 
-const tipBoxData = [
-  'As I see it, yes, you lazy faggot',
-  'Ask again later. And after sucking my dick.',
-  'Better not tell you now, I would drop dead immediately, sucker.',
-  'Cannot predict now. You are such a pussy.',
-  'Concentrate and ask again, asshole',
-  'Don’t count on it, you, 25m virgin',
-  'It is certain. You have brain cancer.',
-  'It is decidedly so go fuck yourself.',
-  'Well, fuck you. And your mom.',
-  'Most likely if your previous life you was a dog. And not a cute one.',
-  'My reply is no. ',
-  'Very doubtful that you are man if you asks such questions.',
-  'Yes. Really. No jokes.',
-]
+const wrapBox = ([rewardData, extensionData]) => {
+  const box = {
+    boxKicker: 'Congratulations! Here is your well-deserved box:',
+    boxName: rewardData.name,
+    boxDescription: rewardData.description,
+  }
+  return extensionData
+    ? {
+        ...box,
+        extensionKicker: 'Amazing luck: your reward is extended!',
+        extensionName: extensionData.name,
+        extensionDescription: extensionData.description,
+      }
+    : box
+}
 
-const addTag = tag => str => `[${tag}] ${str}`
+const packBox = curry(
+  ({ main, extensions }, [rewardCategory, extensionCategory]) => {
+    const availableRewardsList = prop(rewardCategory)(main)
+    const actualReward =
+      availableRewardsList[randomInRange(0, availableRewardsList.length, false)]
+    if (extensionCategory) {
+      const availableExtensionsList = prop(extensionCategory)(extensions)
+      const actualExtension =
+        availableExtensionsList[
+          randomInRange(0, availableExtensionsList.length, false)
+        ]
+      return [actualReward, actualExtension]
+    }
+    return [actualReward]
+  }
+)(getUserRewards())
 
-// generates lootbox from passed data
-// generateLootbox(data: [Any]) -> Any
-const generateLootbox = data => addTag('RED', data[random(0, data.length)])
+const matchExtensionCategory = curry(([rewardCategory, extensions]) => {
+  if (rewardCategory === 'white') return [rewardCategory, null]
+  const extensionChance = randomInRange(0, 100, false)
+  const sortedExtensionChances = Object.entries(extensions).sort(
+    ([key1, val1], [key2, val2]) => val1 - val2
+  )
+  let extensionCategory = null
+  for (let [category, chance] of sortedExtensionChances) {
+    if (extensionChance <= chance) {
+      extensionCategory = category
+    }
+  }
+  return [rewardCategory, extensionCategory]
+})
 
-// generates special lootbox from passed data
-// generateLootbox(data: [Any]) -> Any
-const generateSpecialLootbox = data =>
-  addTag('BLUE', data[random(0, data.length)])
+const matchRewardCategory = curry((globalChances, rolledChance) => {
+  const { main, extensions } = globalChances
+  const sortedMainChances = Object.entries(main).sort(
+    ([key1, val1], [key2, val2]) => val1 - val2
+  )
+  let rewardCategory = 'white'
+  for (let [key, val] of sortedMainChances) {
+    if (rolledChance <= val) {
+      rewardCategory = key
+      break
+    }
+  }
+  return [rewardCategory, extensions]
+})(getUserChances())
 
-const getLootbox = () =>
-  isSpecial(process.env.CHANCE)
-    ? generateLootbox(commonLootboxData)
-    : generateSpecialLootbox(specialLootboxData)
+const makeBox = compose(
+  wrapBox,
+  packBox,
+  matchExtensionCategory,
+  matchRewardCategory
+)
 
-// generates tip box
-const getTipbox = () => tipBoxData[random(0, tipBoxData.length)]
+const getLootbox = () => makeBox(randomInRange())
+
+const alotofboxes = compose(
+  map(r => getLootbox()),
+  range(1)
+)
+
+console.log(alotofboxes(100).filter(a => a.extensionKicker))
 
 module.exports = {
   getLootbox,
-  getTipbox,
+  // getPenaltybox,
+  // showInventory,
+  // showEffects,
+  // activateLootbox,
+  // showHistory
 }

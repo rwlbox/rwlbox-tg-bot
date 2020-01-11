@@ -1,14 +1,21 @@
 const { curry } = require('ramda')
 
-const random = curry((min, max, isFloat = false) => {
-  const range = max - min
+// local chance mock
+const process = {
+  env: {
+    CHANCE: 30,
+  },
+}
+
+// generates random number in given range;
+// randomInRange(min: Number) -> (max: Number) -> (isFloat: Bool) -> Number
+const randomInRange = curry((min = 0, max = 100, isFloat = false) => {
+  // flip values if they are presented in wrong order
+  const range = max > min ? max - min : min - max
   const $random = Math.random() * range + min
   return isFloat ? $random : Math.floor($random)
 })
 
-const isSpecial = chance => Math.random() < (chance / 100).toFixed(1)
-
 module.exports = {
-  isSpecial,
-  random,
+  randomInRange,
 }

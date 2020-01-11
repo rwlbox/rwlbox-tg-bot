@@ -16,10 +16,12 @@ const sendDefaultReply = curry(bot => chatId =>
 
 // takes a tag and a value and logs out the value before passing it forward
 // trace(tag?: String, val: Any ) -> Any
-const trace = tag => value => {
-  console.log(typeof value === 'object' ? JSON.stringify(value) : value)
+const trace = curry((tag, value) => {
+  console.log(
+    `${tag}:\n ${typeof value === 'object' ? JSON.stringify(value) : value}`
+  )
   return value
-}
+})
 
 module.exports = {
   isBotCommand,
