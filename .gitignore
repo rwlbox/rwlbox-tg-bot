@@ -1,3 +1,6 @@
+# Firebase private key
+rwlbox-db-privatekey.json
+
 # Logs
 logs
 *.log

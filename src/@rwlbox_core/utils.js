@@ -1,12 +1,4 @@
 const { curry } = require('ramda')
-
-// local chance mock
-const process = {
-  env: {
-    CHANCE: 30,
-  },
-}
-
 // generates random number in given range;
 // randomInRange(min: Number) -> (max: Number) -> (isFloat: Bool) -> Number
 const randomInRange = curry((min = 0, max = 100, isFloat = false) => {
