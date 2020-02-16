@@ -15,6 +15,16 @@ const client = new ApolloClient({
     fetch: fetch,
   }),
   cache: new InMemoryCache(),
+  defaultOptions: {
+    watchQuery: {
+      fetchPolicy: 'no-cache',
+      errorPolicy: 'ignore',
+    },
+    query: {
+      fetchPolicy: 'no-cache',
+      errorPolicy: 'all',
+    },
+  },
 })
 
 // bot instance object
@@ -37,3 +47,9 @@ const activatedCommandHandler = commandHandler(rwlboxInstance)
 
 // sends default message in case of not handled user inputs
 botInstance.on('message', authInterceptor(botInstance, activatedCommandHandler))
+
+// callback query handler
+botInstance.on(
+  'callback_query',
+  authInterceptor(botInstance, activatedCommandHandler)
+)

@@ -1,4 +1,4 @@
-const getUserDataQuery = require('../graphql').getUserData
+const getUserDataQuery = require('../graphql').queries.getUserData
 
 const { randomInRange } = require('../utils')
 const { compose, curry } = require('ramda')
@@ -21,6 +21,8 @@ const initiateLootboxModule = db => {
       boxKicker: 'Congratulations! Here is your well-deserved box:',
       boxName: actualBox.title,
       boxDescription: actualBox.description,
+      id: actualBox.id,
+      type: actualBox.chance,
     }
     return actualBonus
       ? {
@@ -33,8 +35,9 @@ const initiateLootboxModule = db => {
   }
 
   const packBox = ([user_data, boxCategory, bonusCategory]) => {
-    const card_board = user_data.card_board.map(({ card, chance }) => ({
+    const card_board = user_data.card_board.map(({ card, chance, id }) => ({
       ...card,
+      id,
       chance,
     }))
     const availableBoxList = card_board.filter(
